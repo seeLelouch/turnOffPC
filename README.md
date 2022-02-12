@@ -12,6 +12,6 @@ You can input times by using ``` s``` for seconds, ``` m``` for minutes  ``` h``
 
 >_Times have to be lowercase._
 
-You can also use ```now``` to turn off the pc isntantly.
+You can also use ```now``` to turn off the pc instantly.
 
 **Confirm with** <kbd>enter</kbd>
