@@ -8,221 +8,184 @@ Made by see#0368 (discord)
 #include <ctype.h>
 #include <errno.h>
 #include <limits.h>
+#include <stdbool.h>
 
-int size_input(char *input)
+// Finds the length of input but also sets a boolean if it has found any numerical value inside the input.
+int sizeInput(char *input, bool *hasNumber)
 {
     int size = 0;
+
     while (input[size] != '\0')
     {
         size++;
+
+        if (!(isalpha(input[size - 1])))
+            *hasNumber = true;
     }
-    
+
+    input[size] = '\0';
     return size;
 }
 
-int validate_input(char *input, int length, long *days, long *hours, long *minutes, long *seconds, char *seconds_A, char *minutes_A, char *hours_A, char *days_A)
+void getTime(char *input, char *time_A, int i)
+{
+
+    int lauf_time = i - 1; // One spot before the found time
+    int duration_time = 0; // Length of time
+
+    // This while-loop finds out the length of the time
+    while (!(isalpha(input[lauf_time])) && lauf_time > -1)
+    {
+        duration_time++;
+        lauf_time--;
+    }
+
+    // Writes the time into given Array
+    for (int j = 0; j < duration_time; j++)
+    {
+        time_A[j] = input[lauf_time + (j + 1)];
+    }
+
+    time_A[duration_time] = '\0';
+}
+
+bool stringToLongLong(long long *time, char *time_A)
+{
+    *time = (long long)strtol(time_A, 0, 10);
+
+    if (*time == LONG_MIN || *time == LONG_MAX)
+    {
+        if (errno == ERANGE)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+/*
+Returns a different integer value for different inputs. Writes seconds, minutes, hours and days if found. 
+
+    return 0 = Shutdown PC now
+    return 1 = A time value has been provided twice
+    return 2 = Too big of a number
+    return 3 = Everything went smoothly and shutdown is not set for "now"
+*/
+
+int validateInput(char *input, int size, long long *days, long long *hours, long long *minutes, long long *seconds, char *seconds_A, char *minutes_A, char *hours_A, char *days_A)
 {
     system("cls");
 
-    int cmp = strncmp(input, "now", length);
+    int cmp = strncmp(input, "now", size);
     if (cmp == 0)
-    {
         return 0;
-    }
 
-    int times_s = 0;
-    int times_m = 0;
-    int times_h = 0;
-    int times_d = 0;
-
-    for (int i = length; i >= 0; i--)
+    for (int i = size - 1; i >= 0; i--)
     {
-        if (input[i] == 's')
+
+        int times_S = 0;
+        int times_M = 0;
+        int times_H = 0;
+        int times_D = 0;
+
+        switch (input[i])
         {
-            times_s++;
-            if (times_s == 1)
-            {
 
-                int lauf_s = i - 1;
-                int duration_s = 0;
+        case 's':
+            times_S++;
 
-                while (!(isalpha(input[lauf_s])) && lauf_s > -1)
-                {
-                    duration_s++;
-                    lauf_s--;
-                }
-
-                for (int j = 0; j < duration_s; j++)
-                {
-                    seconds_A[j] = input[lauf_s + (j + 1)];
-                }
-
-                seconds_A[duration_s] = '\0';
-                *seconds = strtol(seconds_A, 0, 10);
-
-                if (*seconds == LONG_MIN || *seconds == LONG_MAX)
-                {
-                    if (errno == ERANGE)
-                    {
-                        printf("Way too big of a number bro\n");
-                        return 8;
-                    }
-                }
-            }
+            if (times_S == 1)
+                getTime(input, seconds_A, i);
             else
-            {
-                return 4;
-            }
-        }
+                return 1;
 
-        if (input[i] == 'm')
-        {
-            times_m++;
-            if (times_m == 1)
-            {
+            break;
 
-                int lauf_m = i - 1;
-                int duration_m = 0;
-                while (!(isalpha(input[lauf_m])) && lauf_m > -1)
-                {
-                    duration_m++;
-                    lauf_m--;
-                }
+        case 'm':
+            times_M++;
 
-                for (int k = 0; k < duration_m; k++)
-                {
-                    minutes_A[k] = input[lauf_m + (k + 1)];
-                }
-                minutes_A[duration_m] = '\0';
-                *minutes = strtol(minutes_A, 0, 10);
-                if (*minutes == LONG_MIN || *minutes == LONG_MAX)
-                {
-                    if (errno == ERANGE)
-                    {
-                        printf("Way too big of a number bro\n");
-                        return 8;
-                    }
-                }
-            }
+            if (times_M == 1)
+                getTime(input, minutes_A, i);
             else
-            {
-                return 4;
-            }
-        }
+                return 1;
 
-        if (input[i] == 'h')
-        {
-            times_h++;
-            if (times_h == 1)
-            {
+            break;
 
-                int lauf_h = i - 1;
-                int duration_h = 0;
-                while (!(isalpha(input[lauf_h])) && lauf_h > -1)
-                {
-                    duration_h++;
-                    lauf_h--;
-                }
+        case 'h':
+            times_H++;
 
-                for (int l = 0; l < duration_h; l++)
-                {
-                    hours_A[l] = input[lauf_h + (l + 1)];
-                }
-                hours_A[duration_h] = '\0';
-                *hours = strtol(hours_A, 0, 10);
-                if (*hours == LONG_MIN || *hours == LONG_MAX)
-                {
-                    if (errno == ERANGE)
-                    {
-                        printf("Way too big of a number bro\n");
-                        return 8;
-                    }
-                }
-            }
+            if (times_H == 1)
+                getTime(input, hours_A, i);
             else
-            {
-                return 4;
-            }
-        }
+                return 1;
 
-        if (input[i] == 'd')
-        {
-            times_d++;
-            if (times_d == 1)
-            {
+            break;
 
-                int lauf_d = i - 1;
-                int duration_d = 0;
-                while (!(isalpha(input[lauf_d])) && lauf_d > -1)
-                {
-                    duration_d++;
-                    lauf_d--;
-                }
+        case 'd':
+            times_D++;
 
-                for (int m = 0; m < duration_d; m++)
-                {
-                    days_A[m] = input[lauf_d + (m + 1)];
-                }
-                days_A[duration_d] = '\0';
-                *days = strtol(days_A, 0, 10);
-                if (*days == LONG_MIN || *days == LONG_MAX)
-                {
-                    if (errno == ERANGE)
-                    {
-                        printf("Way too big of a number bro\n");
-                        return 8;
-                    }
-                }
-            }
+            if (times_D == 1)
+                getTime(input, days_A, i);
             else
-            {
-                return 4;
-            }
+                return 1;
+
+            break;
+
+        default: // Do nothing if it's not s, m, h or d
+            break;
         }
     }
 
-    if (*seconds == 0 && *minutes == 0 && *days == 0 && *hours == 0)
-        return 1;
+    if (stringToLongLong(seconds, seconds_A) == true)
+        return 2;
 
-    return 2;
+    if (stringToLongLong(minutes, minutes_A) == true)
+        return 2;
+
+    if (stringToLongLong(hours, hours_A) == true)
+        return 2;
+
+    if (stringToLongLong(days, days_A) == true)
+        return 2;
+
+    return 3;
 }
-
 int main()
 {
+
     printf("After how long do you want to shut off your computer?\n");
     printf("Examples: \"now, 20h, 6h30m, 2d3h24m30s\"\n");
+    printf("\n Made by #see0368 (discord)\n");
 
     char input[16] = {0};
     scanf("%15s", input);
     input[15] = '\0';
 
-    long days = 0;
-    long hours = 0;
-    long minutes = 0;
-    long seconds = 0;
+    long long days = 0;
+    long long hours = 0;
+    long long minutes = 0;
+    long long seconds = 0;
+    long long totalseconds = 0;
 
-    char seconds_A[15] = {0};
-    char minutes_A[15] = {0};
-    char hours_A[15] = {0};
-    char days_A[15] = {0};
+    char seconds_A[15] = {'\0'};
+    char minutes_A[15] = {'\0'};
+    char hours_A[15] = {'\0'};
+    char days_A[15] = {'\0'};
 
-    int length = size_input(input);
-    if (length <= 0)
+    bool hasNumber = false;
+    int size = sizeInput(input, &hasNumber);
+
+    if (size <= 0)
     {
         printf("Just no.\n");
+        system("PAUSE");
         return 0;
     }
 
-    int when = validate_input(input, length, &days, &hours, &minutes, &seconds, seconds_A, minutes_A, hours_A, days_A);
-
-    if (when == 0)
+    if (hasNumber == false)
     {
-        printf("Pc will shut down any second, this is so the program won't damage your pc.");
-        system("shutdown -s -t 3");
-        return 0;
-    }
-    if (when == 1)
-    {
+        system("cls");
         printf("You didn't specify any times so how will I shutdown for: \n");
         printf("%s?\n", input);
         printf("%s Bananas? Eggs? Watermelons?\n", input);
@@ -230,17 +193,31 @@ int main()
         return 0;
     }
 
-    if (when == 2)
+    int val = validateInput(input, size, &days, &hours, &minutes, &seconds, seconds_A, minutes_A, hours_A, days_A);
+
+    switch (val)
     {
+    case 0:
 
-        if (days > 30 || hours > 720 || minutes > 43200 || seconds > 2592000)
-        {
-            printf("Can't set shut off for longer than 30 days. Why would you even want to?\n");
-            system("PAUSE");
-            return 0;
-        }
+        printf("Pc will shut down any second!");
+        system("shutdown -s -t 3");
+        return 0;
 
-        long long totalseconds = (long long)(seconds + minutes * 60 + hours * 60 * 60 + days * 24 * 60 * 60);
+    case 1:
+
+        printf("Why the fuck do you want a single measurement twice? I'm not a calculator\n");
+        system("PAUSE");
+        return 0;
+
+    case 2:
+
+        printf("Way too big of a number bro\n");
+        system("PAUSE");
+        return 0;
+
+    case 3:
+
+        totalseconds = (seconds + minutes * 60 + hours * 60 * 60 + days * 24 * 60 * 60);
 
         if (totalseconds >= LONG_MAX)
         {
@@ -256,38 +233,29 @@ int main()
             return 0;
         }
 
-        long t_seconds = (long)totalseconds;
+        long final_seconds = (long)totalseconds;
 
-        if (t_seconds < 5)
+        if (final_seconds < 5)
         {
             printf("Minimum shutdown time is 5 seconds (or just use \"now\")\n");
             system("PAUSE");
             return 0;
         }
 
-        char *command = calloc(50, sizeof(char));
+        char command[50] = {'\0'};
 
-        sprintf(command, "shutdown -s -t %ld", t_seconds);
+        sprintf(command, "shutdown -s -t %ld", final_seconds);
 
         system(command);
-        free(command);
 
-        printf("Pc will shutdown in %ld days, %ld, hours, %ld minutes %ld seconds like you requested. :)\n", days, hours, minutes, seconds);
+        printf("Pc will shutdown in %lld days, %lld, hours, %lld minutes %lld seconds like you requested. :)\n", days, hours, minutes, seconds);
+        system("PAUSE");
+        return 0;
+
+    default:
+        printf("This shouldn't have been reached, you found a bug in my code. Please provide me with your input on discord: see#0368\n");
+        printf("Your input: %s\n", input);
         system("PAUSE");
         return 0;
     }
-
-    if (when == 4)
-    {
-        printf("Why the fuck do you want a single measurement twice? I'm not a calculator\n");
-        system("PAUSE");
-        return 0;
-    }
-
-    if (when == 8)
-    {
-        system("PAUSE");
-        return 0;
-    }
-    return 0;
 }
