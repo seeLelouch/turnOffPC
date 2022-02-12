@@ -6,7 +6,7 @@ Works only on Windows.
 ## How to use?
 Upon program start you will be prompted with this:
 
-![]https://github.com/seeLelouch/turnOffPC/blob/v1.0/assets/prompt.png
+![prompt]https://github.com/seeLelouch/turnOffPc/blob/main/assets/prompt.png?raw=true
 
 You can input times by using ``` s``` for seconds, ``` m``` for minutes  ``` h``` for hours  ``` d``` for days and the value you want in front. 
 
