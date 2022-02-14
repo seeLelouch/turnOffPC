@@ -65,21 +65,25 @@ bool stringToLongLong(long long *time, char *time_A)
 }
 
 /*
-Returns a different integer value for different inputs. Writes seconds, minutes, hours and days if found. 
+Returns a different integer value for different inputs. Writes seconds, minutes, hours and days if found.
 
     return 0 = Shutdown PC now
-    return 1 = A time value has been provided twice
-    return 2 = Too big of a number
-    return 3 = Everything went smoothly and shutdown is not set for "now"
+    return 1 = No numerical value provided
+    return 2 = A time value has been provided twice
+    return 3 = Too big of a number
+    return 4 = Everything went smoothly and shutdown is not set for "now"
 */
 
-int validateInput(char *input, int size, long long *days, long long *hours, long long *minutes, long long *seconds, char *seconds_A, char *minutes_A, char *hours_A, char *days_A)
+int validateInput(char *input, int size, long long *days, long long *hours, long long *minutes, long long *seconds, char *seconds_A, char *minutes_A, char *hours_A, char *days_A, bool *hasNumber)
 {
     system("cls");
 
     int cmp = strncmp(input, "now", size);
     if (cmp == 0)
         return 0;
+
+    if (*hasNumber == false)
+        return 1;
 
     for (int i = size - 1; i >= 0; i--)
     {
@@ -158,7 +162,7 @@ int main()
     printf("Examples: \"now, 20h, 6h30m, 2d3h24m30s\"\n");
     printf("\n Made by #see0368 (discord)\n");
 
-    char input[16] = {0};
+    char input[16] = {'\0'};
     scanf("%15s", input);
     input[15] = '\0';
 
@@ -183,17 +187,7 @@ int main()
         return 0;
     }
 
-    if (hasNumber == false)
-    {
-        system("cls");
-        printf("You didn't specify any times so how will I shutdown for: \n");
-        printf("%s?\n", input);
-        printf("%s Bananas? Eggs? Watermelons?\n", input);
-        system("PAUSE");
-        return 0;
-    }
-
-    int val = validateInput(input, size, &days, &hours, &minutes, &seconds, seconds_A, minutes_A, hours_A, days_A);
+    int val = validateInput(input, size, &days, &hours, &minutes, &seconds, seconds_A, minutes_A, hours_A, days_A, &hasNumber);
 
     switch (val)
     {
@@ -205,17 +199,25 @@ int main()
 
     case 1:
 
-        printf("Why the fuck do you want a single measurement twice? I'm not a calculator\n");
+        printf("You didn't specify any times so how will I shutdown for: \n");
+        printf("%s?\n", input);
+        printf("%s Bananas? Eggs? Watermelons?\n", input);
         system("PAUSE");
         return 0;
 
     case 2:
 
-        printf("Way too big of a number bro\n");
+        printf("Why the fuck do you want a single measurement twice? I'm not a calculator\n");
         system("PAUSE");
         return 0;
 
     case 3:
+
+        printf("Way too big of a number bro\n");
+        system("PAUSE");
+        return 0;
+
+    case 4:
 
         totalseconds = (seconds + minutes * 60 + hours * 60 * 60 + days * 24 * 60 * 60);
 
