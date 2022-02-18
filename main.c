@@ -9,6 +9,46 @@ Made by see#0368 (discord)
 #include <errno.h>
 #include <limits.h>
 #include <stdbool.h>
+#include <stdint.h>
+
+typedef struct
+{
+    int times_S;
+    int times_M;
+    int times_H;
+    int times_D;
+
+    char seconds_A[15];
+    char minutes_A[15];
+    char hours_A[15];
+    char days_A[15];
+
+    uint64_t seconds;
+    uint64_t minutes;
+    uint64_t hours;
+    uint64_t days;
+
+    uint64_t totalseconds;
+
+} times;
+
+void fillTimes(times *mainTimes)
+{
+    mainTimes->times_S = 0;
+    mainTimes->times_M = 0;
+    mainTimes->times_H = 0;
+    mainTimes->times_D = 0;
+
+    mainTimes->seconds_A[14] = '\0';
+    mainTimes->minutes_A[14] = '\0';
+    mainTimes->hours_A[14] = '\0';
+    mainTimes->days_A[14] = '\0';
+
+    mainTimes->seconds = 0;
+    mainTimes->minutes = 0;
+    mainTimes->hours = 0;
+    mainTimes->days = 0;
+}
 
 // Finds the length of input but also sets a boolean if it has found any numerical value inside the input.
 int sizeInput(char *input, bool *hasNumber)
@@ -49,19 +89,12 @@ void getTime(char *input, char *time_A, int i)
     time_A[duration_time] = '\0';
 }
 
-bool stringToLongLong(long long *time, char *time_A)
+void stringToNumber(times *mainTimes)
 {
-    *time = (long long)strtol(time_A, 0, 10);
-
-    if (*time == LONG_MIN || *time == LONG_MAX)
-    {
-        if (errno == ERANGE)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    mainTimes->seconds = (uint64_t)strtoll(mainTimes->seconds_A, 0, 10);
+    mainTimes->minutes = (uint64_t)strtoll(mainTimes->minutes_A, 0, 10);
+    mainTimes->hours = (uint64_t)strtoll(mainTimes->hours_A, 0, 10);
+    mainTimes->days = (uint64_t)strtoll(mainTimes->days_A, 0, 10);
 }
 
 /*
@@ -70,11 +103,10 @@ Returns a different integer value for different inputs. Writes seconds, minutes,
     return 0 = Shutdown PC now
     return 1 = No numerical value provided
     return 2 = A time value has been provided twice
-    return 3 = Too big of a number
-    return 4 = Everything went smoothly and shutdown is not set for "now"
+    return 3 = Everything went smoothly and shutdown is not set for "now"
 */
 
-int validateInput(char *input, int size, long long *days, long long *hours, long long *minutes, long long *seconds, char *seconds_A, char *minutes_A, char *hours_A, char *days_A, bool *hasNumber)
+int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
 {
     system("cls");
 
@@ -88,49 +120,44 @@ int validateInput(char *input, int size, long long *days, long long *hours, long
     for (int i = size - 1; i >= 0; i--)
     {
 
-        int times_S = 0;
-        int times_M = 0;
-        int times_H = 0;
-        int times_D = 0;
-
         switch (input[i])
         {
 
         case 's':
-            times_S++;
+            mainTimes->times_S++;
 
-            if (times_S == 1)
-                getTime(input, seconds_A, i);
+            if (mainTimes->times_S == 1)
+                getTime(input, mainTimes->seconds_A, i);
             else
                 return 2;
 
             break;
 
         case 'm':
-            times_M++;
+            mainTimes->times_M++;
 
-            if (times_M == 1)
-                getTime(input, minutes_A, i);
+            if (mainTimes->times_M == 1)
+                getTime(input, mainTimes->minutes_A, i);
             else
                 return 2;
 
             break;
 
         case 'h':
-            times_H++;
+            mainTimes->times_H++;
 
-            if (times_H == 1)
-                getTime(input, hours_A, i);
+            if (mainTimes->times_H == 1)
+                getTime(input, mainTimes->hours_A, i);
             else
                 return 2;
 
             break;
 
         case 'd':
-            times_D++;
+            mainTimes->times_D++;
 
-            if (times_D == 1)
-                getTime(input, days_A, i);
+            if (mainTimes->times_D == 1)
+                getTime(input, mainTimes->days_A, i);
             else
                 return 2;
 
@@ -141,19 +168,8 @@ int validateInput(char *input, int size, long long *days, long long *hours, long
         }
     }
 
-    if (stringToLongLong(seconds, seconds_A) == true)
-        return 3;
-
-    if (stringToLongLong(minutes, minutes_A) == true)
-        return 3;
-
-    if (stringToLongLong(hours, hours_A) == true)
-        return 3;
-
-    if (stringToLongLong(days, days_A) == true)
-        return 3;
-
-    return 4;
+    stringToNumber(mainTimes);
+    return 3;
 }
 int main()
 {
@@ -166,16 +182,8 @@ int main()
     scanf("%15s", input);
     input[15] = '\0';
 
-    long long days = 0;
-    long long hours = 0;
-    long long minutes = 0;
-    long long seconds = 0;
-    long long totalseconds = 0;
-
-    char seconds_A[15] = {'\0'};
-    char minutes_A[15] = {'\0'};
-    char hours_A[15] = {'\0'};
-    char days_A[15] = {'\0'};
+    times mainTimes;
+    fillTimes(&mainTimes);
 
     bool hasNumber = false;
     int size = sizeInput(input, &hasNumber);
@@ -187,7 +195,7 @@ int main()
         return 0;
     }
 
-    int val = validateInput(input, size, &days, &hours, &minutes, &seconds, seconds_A, minutes_A, hours_A, days_A, &hasNumber);
+    int val = validateInput(&mainTimes, input, size, &hasNumber);
 
     switch (val)
     {
@@ -213,31 +221,19 @@ int main()
 
     case 3:
 
-        printf("Way too big of a number bro\n");
-        system("PAUSE");
-        return 0;
+        // Should fit into uint64_t
+        mainTimes.totalseconds = (mainTimes.seconds + mainTimes.minutes * 60 + mainTimes.hours * 60 * 60 + mainTimes.days * 24 * 60 * 60);
 
-    case 4:
-
-        totalseconds = (seconds + minutes * 60 + hours * 60 * 60 + days * 24 * 60 * 60);
-
-        if (totalseconds >= LONG_MAX)
-        {
-            printf("Way too big of a number bro\n");
-            system("PAUSE");
-            return 0;
-        }
-
-        if (totalseconds > 2592000)
+        if (mainTimes.totalseconds > 2592000)
         {
             printf("Can't set shut off for longer than 30 days. Why would you even want to?\n");
             system("PAUSE");
             return 0;
         }
 
-        long final_seconds = (long)totalseconds;
+        uint32_t finalseconds = (uint32_t)mainTimes.totalseconds;
 
-        if (final_seconds < 5)
+        if (finalseconds < 5)
         {
             printf("Minimum shutdown time is 5 seconds (or just use \"now\")\n");
             system("PAUSE");
@@ -246,11 +242,11 @@ int main()
 
         char command[50] = {'\0'};
 
-        sprintf(command, "shutdown -s -t %ld", final_seconds);
+        sprintf(command, "shutdown -s -t %u", finalseconds);
 
         system(command);
 
-        printf("Pc will shutdown in %lld days, %lld, hours, %lld minutes %lld seconds like you requested. :)\n", days, hours, minutes, seconds);
+        printf("Pc will shutdown inm %llu days, %llu, hours, %llu minutes %llu seconds like you requested. :)\n", mainTimes.days, mainTimes.hours, mainTimes.minutes, mainTimes.seconds);
         system("PAUSE");
         return 0;
 
