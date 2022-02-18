@@ -48,6 +48,8 @@ void fillTimes(times *mainTimes)
     mainTimes->minutes = 0;
     mainTimes->hours = 0;
     mainTimes->days = 0;
+
+    mainTimes->totalseconds = 0;
 }
 
 // Finds the length of input but also sets a boolean if it has found any numerical value inside the input.
