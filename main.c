@@ -6,8 +6,6 @@ Made by see#0368 (discord)
 #include <stdlib.h>
 #include <string.h>
 #include <ctype.h>
-#include <errno.h>
-#include <limits.h>
 #include <stdbool.h>
 #include <stdint.h>
 
