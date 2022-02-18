@@ -246,7 +246,7 @@ int main(void)
 
         system(command);
 
-        printf("Pc will shutdown inm %llu days, %llu, hours, %llu minutes %llu seconds like you requested. :)\n", mainTimes.days, mainTimes.hours, mainTimes.minutes, mainTimes.seconds);
+        printf("Pc will shutdown in %llu days, %llu, hours, %llu minutes %llu seconds like you requested. :)\n", mainTimes.days, mainTimes.hours, mainTimes.minutes, mainTimes.seconds);
         system("PAUSE");
         return 0;
 
