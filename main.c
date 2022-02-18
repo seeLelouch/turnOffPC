@@ -173,7 +173,7 @@ int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
     stringToNumber(mainTimes);
     return 3;
 }
-int main()
+int main(void)
 {
 
     printf("After how long do you want to shut off your computer?\n");
