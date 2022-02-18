@@ -102,7 +102,7 @@ int validateInput(char *input, int size, long long *days, long long *hours, long
             if (times_S == 1)
                 getTime(input, seconds_A, i);
             else
-                return 1;
+                return 2;
 
             break;
 
@@ -112,7 +112,7 @@ int validateInput(char *input, int size, long long *days, long long *hours, long
             if (times_M == 1)
                 getTime(input, minutes_A, i);
             else
-                return 1;
+                return 2;
 
             break;
 
@@ -122,7 +122,7 @@ int validateInput(char *input, int size, long long *days, long long *hours, long
             if (times_H == 1)
                 getTime(input, hours_A, i);
             else
-                return 1;
+                return 2;
 
             break;
 
@@ -132,7 +132,7 @@ int validateInput(char *input, int size, long long *days, long long *hours, long
             if (times_D == 1)
                 getTime(input, days_A, i);
             else
-                return 1;
+                return 2;
 
             break;
 
@@ -142,18 +142,18 @@ int validateInput(char *input, int size, long long *days, long long *hours, long
     }
 
     if (stringToLongLong(seconds, seconds_A) == true)
-        return 2;
+        return 3;
 
     if (stringToLongLong(minutes, minutes_A) == true)
-        return 2;
+        return 3;
 
     if (stringToLongLong(hours, hours_A) == true)
-        return 2;
+        return 3;
 
     if (stringToLongLong(days, days_A) == true)
-        return 2;
+        return 3;
 
-    return 3;
+    return 4;
 }
 int main()
 {
