@@ -101,21 +101,27 @@ void stringToNumber(times *mainTimes)
 Returns a different integer value for different inputs. Writes seconds, minutes, hours and days if found.
 
     return 0 = Shutdown PC now
-    return 1 = No numerical value provided
-    return 2 = A time value has been provided twice
-    return 3 = Everything went smoothly and shutdown is not set for "now"
+    return 1 = open menu
+    return 2 = No numerical value provided
+    return 3 = A time value has been provided twice
+    return 4 = Everything went smoothly and shutdown is not set for "now"
 */
 
 int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
 {
     system("cls");
+    int cmp;
 
-    int cmp = strncmp(input, "now", size);
+    cmp = strncmp(input, "now", size);
     if (cmp == 0)
         return 0;
 
-    if (*hasNumber == false)
+    cmp = strncmp(input, "m", size);
+    if (cmp == 0)
         return 1;
+
+    if (*hasNumber == false)
+        return 2;
 
     for (int i = size - 1; i >= 0; i--)
     {
@@ -129,7 +135,7 @@ int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
             if (mainTimes->times_S == 1)
                 getTime(input, mainTimes->seconds_A, i);
             else
-                return 2;
+                return 3;
 
             break;
 
@@ -139,7 +145,7 @@ int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
             if (mainTimes->times_M == 1)
                 getTime(input, mainTimes->minutes_A, i);
             else
-                return 2;
+                return 3;
 
             break;
 
@@ -149,7 +155,7 @@ int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
             if (mainTimes->times_H == 1)
                 getTime(input, mainTimes->hours_A, i);
             else
-                return 2;
+                return 3;
 
             break;
 
@@ -159,7 +165,7 @@ int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
             if (mainTimes->times_D == 1)
                 getTime(input, mainTimes->days_A, i);
             else
-                return 2;
+                return 3;
 
             break;
 
@@ -169,17 +175,23 @@ int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
     }
 
     stringToNumber(mainTimes);
-    return 3;
+    return 4;
 }
-int main(void)
+bool initialize()
 {
 
     printf("After how long do you want to shut off your computer?\n");
     printf("Examples: \"now, 20h, 6h30m, 2d3h24m30s\"\n");
-    printf("\n Made by #see0368 (discord)\n");
+
+    printf("\n(There is also a menu if you type \"m\")\n");
+
+    printf("\n Made by #see0368 (discord)\n\n");
 
     char input[16] = {'\0'};
-    scanf("%15s", input);
+    char inputMenu[2] = {'\0'};
+    char command[50] = {'\0'};
+
+    scanf(" %15s", input);
     input[15] = '\0';
 
     times mainTimes;
@@ -191,8 +203,7 @@ int main(void)
     if (size <= 0)
     {
         printf("Just no.\n");
-        system("PAUSE");
-        return 0;
+        return true;
     }
 
     int val = validateInput(&mainTimes, input, size, &hasNumber);
@@ -203,23 +214,58 @@ int main(void)
 
         printf("Pc will shut down any second!");
         system("shutdown -s -t 3");
-        return 0;
+        return true;
 
     case 1:
+
+        printf("You have opened the menu\n");
+        printf("Available options:\n\n");
+        printf("\"a\" for aborting currently set timer\n");
+        printf("\"l\" to leave menu\n");
+        printf("\"q\" to quit program\n\n");
+
+        scanf(" %1s", inputMenu);
+
+        if (!(strncmp(inputMenu, "a", 1)))
+        {
+            system("cls");
+            sprintf(command, "shutdown -a");
+            system(command);
+
+            printf("\nNo Error message above means shutdown canceled succesfully\n");
+            return true;
+        }
+
+        if (!(strncmp(inputMenu, "l", 1)))
+        {
+            return false;
+        }
+
+        if (!(strncmp(inputMenu, "q", 1)))
+        {
+            system("cls");
+            return true;
+        }
+
+        system("cls");
+        printf("Input (%c) has no use\n", inputMenu[0]);
+
+        system("PAUSE");
+        return false;
+
+    case 2:
 
         printf("You didn't specify any times so how will I shutdown for: \n");
         printf("%s?\n", input);
         printf("%s Bananas? Eggs? Watermelons?\n", input);
-        system("PAUSE");
-        return 0;
-
-    case 2:
-
-        printf("Why the fuck do you want a single measurement twice? I'm not a calculator\n");
-        system("PAUSE");
-        return 0;
+        return true;
 
     case 3:
+
+        printf("Why the fuck do you want a single measurement twice? I'm not a calculator\n");
+        return true;
+
+    case 4:
 
         // Should fit into uint64_t
         mainTimes.totalseconds = (mainTimes.seconds + mainTimes.minutes * 60 + mainTimes.hours * 60 * 60 + mainTimes.days * 24 * 60 * 60);
@@ -227,8 +273,7 @@ int main(void)
         if (mainTimes.totalseconds > 2592000)
         {
             printf("Can't set shut off for longer than 30 days. Why would you even want to?\n");
-            system("PAUSE");
-            return 0;
+            return true;
         }
 
         uint32_t finalseconds = (uint32_t)mainTimes.totalseconds;
@@ -236,24 +281,38 @@ int main(void)
         if (finalseconds < 5)
         {
             printf("Minimum shutdown time is 5 seconds (or just use \"now\")\n");
-            system("PAUSE");
-            return 0;
+            return true;
         }
-
-        char command[50] = {'\0'};
 
         sprintf(command, "shutdown -s -t %u", finalseconds);
 
         system(command);
 
         printf("Pc will shutdown in %llu days, %llu, hours, %llu minutes %llu seconds like you requested. :)\n", mainTimes.days, mainTimes.hours, mainTimes.minutes, mainTimes.seconds);
-        system("PAUSE");
-        return 0;
+        return true;
 
     default:
         printf("This shouldn't have been reached, you found a bug in my code. Please provide me with your input on discord: see#0368\n");
         printf("Your input: %s\n", input);
-        system("PAUSE");
-        return 0;
+        return true;
     }
+}
+
+int main(void)
+{
+
+    bool endProgram = false;
+
+    while (!endProgram)
+    {
+        system("cls");
+        endProgram = initialize();
+
+        // clear buffer
+        while ((getchar()) != '\n')
+            ;
+    }
+
+    system("PAUSE");
+    return 0;
 }
