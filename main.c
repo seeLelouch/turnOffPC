@@ -212,7 +212,7 @@ bool initialize()
     {
     case 0:
 
-        printf("Pc will shut down any second!");
+        printf("Pc will shut down any second!\n");
         system("shutdown -s -t 3");
         return true;
 
