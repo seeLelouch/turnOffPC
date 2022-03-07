@@ -177,6 +177,10 @@ int validateInput(times *mainTimes, char *input, int size, bool *hasNumber)
     stringToNumber(mainTimes);
     return 4;
 }
+
+/*
+ returning true quits the program, false loops over initilize() again
+*/
 bool initialize()
 {
 
@@ -220,7 +224,8 @@ bool initialize()
 
         printf("You have opened the menu\n");
         printf("Available options:\n\n");
-        printf("\"a\" for aborting currently set timer\n");
+        printf("\"a\" to abort currently set timer\n");
+        printf("\"r\" to perform a restart instead of shutdown right now\n");
         printf("\"l\" to leave menu\n");
         printf("\"q\" to quit program\n\n");
 
@@ -233,6 +238,13 @@ bool initialize()
             system(command);
 
             printf("\nNo Error message above means shutdown canceled succesfully\n");
+            return true;
+        }
+
+        if (!(strncmp(inputMenu, "r", 1)))
+        {
+            printf("Pc will restart any second!\n");
+            system("shutdown -r");
             return true;
         }
 
@@ -259,7 +271,7 @@ bool initialize()
         printf("%s?\n", input);
         printf("%s Bananas? Eggs? Watermelons?\n", input);
         return true;
-
+        //
     case 3:
 
         printf("Why the fuck do you want a single measurement twice? I'm not a calculator\n");
