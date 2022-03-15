@@ -30,6 +30,15 @@ typedef struct
 
 } times;
 
+typedef struct
+{
+    uint32_t printSeconds;
+    uint32_t printMinutes;
+    uint32_t printHours;
+    uint32_t printDays;
+
+} printTimes;
+
 void fillTimes(times *mainTimes)
 {
     mainTimes->times_S = 0;
@@ -95,6 +104,29 @@ void stringToNumber(times *mainTimes)
     mainTimes->minutes = (uint64_t)strtoll(mainTimes->minutes_A, 0, 10);
     mainTimes->hours = (uint64_t)strtoll(mainTimes->hours_A, 0, 10);
     mainTimes->days = (uint64_t)strtoll(mainTimes->days_A, 0, 10);
+}
+
+/*
+Sets "printTimes" which are the input times but converted into logical values for
+days, hours, minutes, seconds. e.g. 30 hours as input will print 1 day 6 hours instead.
+*/
+void fillPrintTimes(printTimes *pTimes, uint32_t *finalseconds)
+{
+    uint32_t f = *finalseconds;
+
+    pTimes->printDays = f / 24 / 60 / 60;
+    if (pTimes->printDays)
+        f = f - 86400 * pTimes->printDays;
+
+    pTimes->printHours = f / 60 / 60;
+    if (pTimes->printHours)
+        f = f - 3600 * pTimes->printHours;
+
+    pTimes->printMinutes = f / 60;
+    if (pTimes->printMinutes)
+        f = f - 60 * pTimes->printMinutes;
+
+    pTimes->printSeconds = f;
 }
 
 /*
@@ -191,9 +223,14 @@ bool initialize()
 
     printf("\n Made by #see0368 (discord)\n\n");
 
-    char input[16] = {'\0'};
-    char inputMenu[2] = {'\0'};
-    char command[50] = {'\0'};
+    char input[16];
+    input[15] = '\0';
+
+    char inputMenu[2];
+    inputMenu[1] = '\0';
+
+    char command[50];
+    command[49] = '\0';
 
     scanf(" %15s", input);
     input[15] = '\0';
@@ -296,11 +333,14 @@ bool initialize()
             return true;
         }
 
+        printTimes pTimes;
+        fillPrintTimes(&pTimes, &finalseconds);
+
         sprintf(command, "shutdown -s -t %u", finalseconds);
 
         system(command);
 
-        printf("Pc will shutdown in %llu days, %llu, hours, %llu minutes %llu seconds like you requested. :)\n", mainTimes.days, mainTimes.hours, mainTimes.minutes, mainTimes.seconds);
+        printf("Pc will shutdown in %u days, %u, hours, %u minutes %u seconds like you requested. :)\n", pTimes.printDays, pTimes.printHours, pTimes.printMinutes, pTimes.printSeconds);
         return true;
 
     default:
